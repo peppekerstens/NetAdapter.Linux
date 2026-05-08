@@ -5,8 +5,6 @@
     Author            = 'Peppe Kerstens'
     Description       = 'PowerShell NetAdapter module for Linux — mirrors the Windows NetAdapter module surface using ip link (iproute2).'
     PowerShellVersion = '7.2'
-    Tags              = @('Linux', 'NetAdapter', 'Network', 'iproute2')
-    ProjectUri        = 'https://github.com/peppekerstens/NetAdapter.Linux'
 
     FunctionsToExport = @(
         'Disable-NetAdapter',
@@ -95,6 +93,8 @@
 
     PrivateData = @{
         PSData = @{
+            Tags         = @('Linux', 'NetAdapter', 'Network', 'iproute2')
+            ProjectUri   = 'https://github.com/peppekerstens/NetAdapter.Linux'
             ReleaseNotes = @'
 ## 0.1.0
 - Initial release
