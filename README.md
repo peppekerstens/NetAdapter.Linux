@@ -1,5 +1,7 @@
 # NetAdapter.Linux
 
+[![Pester Tests](https://github.com/peppekerstens/NetAdapter.Linux/actions/workflows/pester.yml/badge.svg)](https://github.com/peppekerstens/NetAdapter.Linux/actions/workflows/pester.yml)
+
 PowerShell `NetAdapter` module for Linux — mirrors the Windows `NetAdapter` module surface using `ip link` (iproute2).
 
 ## What it does
