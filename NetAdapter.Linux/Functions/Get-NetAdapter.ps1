@@ -40,16 +40,7 @@ function Get-NetAdapter {
             $PSCmdlet.ThrowTerminatingError($er)
         }
 
-        $json = ip -json link show 2>&1
-        if ($LASTEXITCODE -ne 0) {
-            $ex = [System.InvalidOperationException]::new("ip link show failed: $json")
-            $er = [System.Management.Automation.ErrorRecord]::new(
-                $ex, 'NetAdapter.Linux.IpLinkFailed',
-                [System.Management.Automation.ErrorCategory]::InvalidOperation, $null)
-            $PSCmdlet.ThrowTerminatingError($er)
-        }
-
-        $links = $json | ConvertFrom-Json
+        $links = Get-IpLink
 
         foreach ($link in $links) {
             # Filter by index

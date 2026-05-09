@@ -32,16 +32,7 @@ function Get-NetAdapterStatistics {
             $PSCmdlet.ThrowTerminatingError($er)
         }
 
-        $json = ip -s -json link show 2>&1
-        if ($LASTEXITCODE -ne 0) {
-            $ex = [System.InvalidOperationException]::new("ip -s link show failed: $json")
-            $er = [System.Management.Automation.ErrorRecord]::new(
-                $ex, 'NetAdapter.Linux.IpLinkStatsFailed',
-                [System.Management.Automation.ErrorCategory]::InvalidOperation, $null)
-            $PSCmdlet.ThrowTerminatingError($er)
-        }
-
-        $links = $json | ConvertFrom-Json
+        $links = Get-IpLink -Statistics
 
         foreach ($link in $links) {
             if ($PSCmdlet.ParameterSetName -eq 'ByIndex' -and $link.ifindex -ne $InterfaceIndex) {

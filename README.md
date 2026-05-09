@@ -73,17 +73,17 @@ Get-NetAdapter -Physical | Disable-NetAdapter -WhatIf
 
 ## Implementation Notes
 
-### `ip -json link show`
+### `ip -json link show` via private Crescendo wrapper
 
-`iproute2` has supported `--json` output since kernel 4.12 (2017). `Get-NetAdapter` uses `ip -json link show` — no text parsing. Each link object provides `ifindex`, `ifname`, `address` (MAC), `operstate`, `flags`, `mtu`, `link_type`.
+`iproute2` has supported `--json` output since kernel 4.12 (2017). `Get-NetAdapter` and `Get-NetAdapterStatistics` use a private `Get-IpLink` helper (loaded from `Crescendo/ip.psm1`) rather than calling `ip` directly. `Get-NetAdapter` calls `Get-IpLink`; `Get-NetAdapterStatistics` calls `Get-IpLink -Statistics` which adds `-s` for per-interface RX/TX counters. The wrapper centralises error handling and is not exported.
 
 ### Link speed from `/sys/class/net`
 
 `ip link show` does not include link speed. Speed is read from `/sys/class/net/<name>/speed`. Virtual adapters (loopback, bridges, tunnels) return -1 or error from that file — these are reported as `Unknown`.
 
-### Statistics from `ip -s -json link show`
+### Statistics from `ip -s -json link show` via `Get-IpLink -Statistics`
 
-`-s` adds `stats64` to each link object with `rx` and `tx` subtrees containing `bytes`, `packets`, `errors`, and `dropped`. `Get-NetAdapterStatistics` maps these directly.
+`-s` adds `stats64` to each link object with `rx` and `tx` subtrees containing `bytes`, `packets`, `errors`, and `dropped`. `Get-NetAdapterStatistics` calls `Get-IpLink -Statistics` which passes `-s` to `ip` via the private helper.
 
 ### NDIS offload cmdlets — out of scope
 
@@ -93,6 +93,18 @@ The majority of the Windows `NetAdapter` surface covers hardware offload feature
 
 - `-ComputerName` — remote management is out of scope; emits a warning if used
 - Physical adapter detection is heuristic (excludes loopback, veth, docker, tun/tap, dummy, virbr)
+
+### Implementation Approach (Stage 2 — Crescendo audit)
+
+**Decision: Migrate `ip` calls to a private Crescendo-backed wrapper module.**
+
+`ip -json link show` was previously called inline in both `Get-NetAdapter` and `Get-NetAdapterStatistics`, duplicating the invocation and JSON parsing. A private module at `Crescendo/ip.psm1` (backed by `Crescendo/ip.crescendo.json`) now centralises the call:
+
+| Helper | Wraps | Used by |
+|---|---|---|
+| `Get-IpLink` | `ip [-s] -json link show` | `Get-NetAdapter`, `Get-NetAdapterStatistics` |
+
+`Crescendo/ip.psm1` is loaded as a nested module in `NetAdapter.Linux.psm1` and is **not** exported.
 
 ## How we built this
 

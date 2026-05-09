@@ -1,0 +1,32 @@
+{
+    "$schema": "https://aka.ms/PowerShell/Crescendo/Schemas/2022-06",
+    "commands": [
+        {
+            "Verb": "Get",
+            "Noun": "IpLink",
+            "OriginalName": "ip",
+            "OriginalCommandElements": ["-json", "link", "show"],
+            "Platform": ["Linux"],
+            "SupportsShouldProcess": false,
+            "Parameters": [
+                {
+                    "Name": "Statistics",
+                    "OriginalName": "-s",
+                    "ParameterType": "switch",
+                    "ApplyToExecutable": true
+                }
+            ],
+            "OutputHandlers": [
+                {
+                    "ParameterSetName": "Default",
+                    "HandlerType": "Inline",
+                    "Handler": "$args[0] | ConvertFrom-Json",
+                    "OutputType": "System.Management.Automation.PSObject[]",
+                    "OutputTypeDescription": "Array of network link objects with optional statistics."
+                }
+            ],
+            "Description": "Returns JSON output of 'ip link show' or 'ip -s link show' — network interface link-layer info with optional statistics.",
+            "Usage": { "Synopsis": "Gets network link information for all interfaces." }
+        }
+    ]
+}
